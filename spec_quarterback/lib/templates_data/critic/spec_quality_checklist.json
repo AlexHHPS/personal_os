@@ -1,0 +1,36 @@
+{
+    "spec_reviewed": "[feature name and spec ID]",
+    "reviewed_at": "[ISO 8601 timestamp]",
+    "reviewer_role": "[Proposal|Design|Requirements|Tasks|Consistency|Full]",
+    "scores": {
+      "clarity": 0.0,
+      "coverage": 0.0,
+      "edge_cases": 0.0,
+      "architecture": 0.0,
+      "nfr_measurability": 0.0,
+      "task_implementability": 0.0,
+      "traceability": 0.0,
+      "consistency": 0.0
+    },
+    "overall_score": 0.0,
+    "issues": [
+      {
+        "severity": "CRITICAL|MAJOR|MINOR",
+        "dimension": "[dimension name]",
+        "location": "[Section heading > exact quoted text]",
+        "description": "[what contract is broken and why it matters]",
+        "suggestion": "[concrete fix — not 'add more detail']"
+      }
+    ],
+    "banned_vocabulary_found": [
+      {
+        "word": "[banned word]",
+        "location": "[section and quoted sentence]",
+        "required_action": "[replacement instruction]"
+      }
+    ],
+    "binary_blockers_failed": ["[list of BLOCKER items that failed]"],
+    "summary": "[2-3 sentence synthesis of the spec's main weaknesses]",
+    "verdict": "GO|REVISE|STOP",
+    "confidence": "HIGH|MEDIUM|LOW"
+  }
