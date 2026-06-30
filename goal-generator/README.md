@@ -6,6 +6,19 @@ Compatible with: **Claude Code · Hermes Agent · Codex CLI · Cursor**
 
 ---
 
+## What's new in v2.1
+
+- **Goal prompt guaranteed < 4000 chars** (copy-paste budget, newlines counted).
+- **Plan-backed goals**: tasks needing real context no longer inline everything.
+  The skill calls **`/plan`** to write `docs/goals/<slug>-plan.md`, then emits a
+  compact goal that points to that file.
+- **Quality score in every response**: the skill reports a `NN/100` rubric score
+  for the goal it just produced, plus 2–4 follow-up questions to sharpen it.
+- The goal is emitted inside a ` ```goal ` fenced block so it stays
+  machine-extractable even with the quality report appended.
+- `validate_goal.py` now prints `QUALITY_SCORE: NN/100` and enforces the 4000-char
+  hard cap; `generate-goal.sh` extracts the goal from the ` ```goal ` block.
+
 ## What's new in v2
 
 - **Product engineering templates**: `linear-ticket`, `poc-branch`, `ux-validation`,
@@ -43,8 +56,17 @@ cp -r goal-generator ~/.hermes/skills/
 ```
 
 ### Programmatic
+The skill response now contains a ` ```goal ` block plus a quality report, so
+extract the goal from that block (or use `scripts/generate-goal.sh`, which
+extracts + validates and prints the quality report to stderr):
 ```bash
-GOAL=$(claude -p "/goal-generator linear-ticket ENG-1234")
+# Easiest: the helper extracts the goal, validates it, prints the score to stderr
+GOAL=$(scripts/generate-goal.sh linear-ticket "ENG-1234")
+claude -p "/goal $GOAL"
+
+# Or extract the goal block yourself
+GOAL=$(claude -p "/goal-generator linear-ticket ENG-1234" \
+  | awk '/^```goal/{f=1;next} /^```/{f=0} f' | sed '/^📄 Plan:/d')
 claude -p "/goal $GOAL"
 ```
 
@@ -52,15 +74,31 @@ claude -p "/goal $GOAL"
 ```bash
 #!/bin/bash
 # Trigger: ticket moved to "In Progress" in Linear
-GOAL=$(claude -p "/goal-generator linear-ticket $LINEAR_TICKET_ID")
+GOAL=$(scripts/generate-goal.sh linear-ticket "$LINEAR_TICKET_ID")
 claude --skip-permissions -p "/goal $GOAL"
 ```
 
 ### From a CI merge gate (POC comparison)
 ```bash
-GOAL=$(claude -p "/goal-generator poc-branch 'Redis cache vs in-memory on /api/feed'")
+GOAL=$(scripts/generate-goal.sh poc-branch "Redis cache vs in-memory on /api/feed")
 claude -p "/goal $GOAL"
 ```
+
+---
+
+## Output format
+
+Every invocation returns:
+
+1. The goal prompt inside a ` ```goal ` block (under 4000 chars, copy-paste ready).
+   - For plan-backed goals, a `📄 Plan: docs/goals/<slug>-plan.md` line points to
+     the `/plan`-generated document that holds the full detail.
+2. A `## 📊 Goal quality score: NN/100` section with a per-dimension breakdown.
+3. A `## 🔧 Follow-up questions to sharpen the goal` section (2–4 questions).
+
+When a task is too detailed for a compact goal, the skill writes the plan to
+`docs/goals/<slug>-plan.md` (via `/plan`) and the goal simply says
+`Execute the plan in docs/goals/<slug>-plan.md.` — keeping the prompt short.
 
 ---
 

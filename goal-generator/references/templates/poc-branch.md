@@ -80,27 +80,17 @@ Step 7 — Push and open draft PR
 - poc-results/ directory must be committed to the branch (not gitignored)
 - Do not open a non-draft PR — always draft until human review
 
-## Full goal example (LONG form)
-```
-## Goal
-Build POC replacing in-memory session cache with Redis on /api/feed endpoint,
-compare p95 latency and RPS vs main, produce comparison report.
+## Full goal example (PLAN-BACKED form)
+This workflow has a 7-step sequence, so use Form B (SKILL.md Step 4): write the
+detail to a `/plan`-generated document and emit a compact goal pointing to it,
+keeping the goal prompt under 4000 chars.
 
-## Done when
-`jq .verdict poc-results/comparison.json` outputs "POC_WINS" or "INCONCLUSIVE"
-AND `gh pr list --head poc/redis-cache --json state -q .[0].state` outputs "OPEN"
-AND `cat poc-results/comparison.md | wc -l` outputs > 20
-
-## Constraints
-- POC scope: only src/cache/ and src/api/feed.ts
-- Do not modify auth, payments, or any other service
-- Benchmark must use k6 against local Docker stack (not production)
-- Branch name must start with poc/
-
-## Max attempts
-15
-
-## Escalate if
-Docker stack fails to start after 3 attempts,
-OR baseline benchmark errors > 5% (infra problem, not a code problem)
+First write `docs/goals/poc-branch-redis-cache-plan.md` (the 7-step workflow
+above, KPI schema, verdict rules, and benchmark commands). Then emit:
+```goal
+/goal Execute the plan in docs/goals/poc-branch-redis-cache-plan.md.
+Done when: `jq .verdict poc-results/comparison.json` outputs "POC_WINS" or "INCONCLUSIVE" AND `gh pr list --head poc/redis-cache --json state -q .[0].state` outputs "OPEN" AND `cat poc-results/comparison.md | wc -l` outputs > 20
+CONSTRAINTS: POC scope only src/cache/ and src/api/feed.ts; do not modify auth, payments, or other services; branch name must start with poc/ — full workflow in the plan
+MAX_ATTEMPTS: 15
+ESCALATE_IF: Docker stack fails to start after 3 attempts, OR baseline benchmark errors > 5% (infra problem, not code)
 ```

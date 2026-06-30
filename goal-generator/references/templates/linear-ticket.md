@@ -46,28 +46,20 @@ Commit: [git rev-parse HEAD]
 - Do not mark Done if any test fails — set to "In Review" instead
 - Linear state transitions must follow team workflow (e.g., In Progress → In Review → Done)
 
-## Full goal example (LONG form)
-```
-## Goal
-Implement Linear ticket $TICKET_ID end-to-end: code, test, evidence, comment, status.
+## Full goal example (PLAN-BACKED form)
+This workflow is multi-step, so use Form B (SKILL.md Step 4): write the detail
+to a `/plan`-generated document and emit a compact goal that points to it. This
+keeps the goal prompt under 4000 chars.
 
-## Done when
-`linear.get_issue($TICKET_ID) | jq .state.name` outputs "In Review"
-AND `linear.get_issue($TICKET_ID) | jq .comments[].body | grep "proof-of-work"` is non-empty
-AND `[test_runner]` exits with 0
-
-## Constraints
-- Only modify files relevant to the ticket scope (read from ticket description)
-- Do not touch other tickets or open issues
-- Proof comment must include commit SHA and branch name
-- If UI ticket: must include at least one screenshot path from proofshot-artifacts/
-
-## Max attempts
-12
-
-## Escalate if
-Ticket requirements are ambiguous after reading description + comments,
-OR test runner fails with >3 distinct error types after 6 iterations
+First write `docs/goals/linear-ticket-$TICKET_ID-plan.md` (full context, file
+scope, step-by-step implementation, the proof-of-work comment format above, and
+evidence artifacts). Then emit:
+```goal
+/goal Execute the plan in docs/goals/linear-ticket-$TICKET_ID-plan.md.
+Done when: `linear.get_issue($TICKET_ID) | jq .state.name` outputs "In Review" AND `linear.get_issue($TICKET_ID) | jq .comments[].body | grep "proof-of-work"` is non-empty AND `[test_runner]` exits with 0
+CONSTRAINTS: do not modify tickets other than $TICKET_ID; do not merge to main; proof comment must include commit SHA + branch — full file scope in the plan
+MAX_ATTEMPTS: 12
+ESCALATE_IF: requirements ambiguous after reading description + comments, OR test runner fails with >3 distinct error types after 6 iterations
 ```
 
 ## MCP setup reminder
